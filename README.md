@@ -1,2 +1,2 @@
 # Anzee
-Mailchimp API
+Experimental Mailchimp API Client
