@@ -11,7 +11,7 @@ import Foundation
 struct CampaignsRequest: APIRequest {
     var params: [URLQueryItem]?
 
-    var apiPath: String { return "/campaigns" }
+    var apiPath: String { return "campaigns" }
 
     public typealias CampaignsRequestCallback = ((_ campaigns: [Campaign]?, _ error: APIError?) -> Void)
 

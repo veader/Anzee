@@ -13,7 +13,7 @@ struct CampaignRequest: APIRequest {
 
     var params: [URLQueryItem]?
 
-    var apiPath: String { return "/campaigns/\(campaignID)" }
+    var apiPath: String { return "campaigns/\(campaignID)" }
 
     public typealias CampaignRequestCallback = ((_ campaign: Campaign?, _ error: APIError?) -> Void)
 
