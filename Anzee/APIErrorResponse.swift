@@ -8,6 +8,7 @@
 
 import Foundation
 
+/// Basic struct to parse any possible API error responses
 struct APIErrorResponse: Codable {
     let status: Int
     let type: String

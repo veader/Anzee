@@ -45,10 +45,6 @@ struct CampaignRequest: APIRequest {
             let response = try decoder.decode(Campaign.self, from: json)
             callback?(response, nil)
         } catch {
-            print(error)
-            let jsonData = try? JSONSerialization.jsonObject(with: json, options: JSONSerialization.ReadingOptions.allowFragments)
-            print(jsonData ?? "huh")
-
             if let responseError = try? decoder.decode(APIErrorResponse.self, from: json) {
                 callback?(nil, .apiError(response: responseError))
             } else {

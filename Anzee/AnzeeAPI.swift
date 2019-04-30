@@ -34,11 +34,13 @@ struct AnzeeAPI {
     /// - Note: The token should take the form of 'abcd...xyz-us0'
     var token: String?
 
+    /// "Base" token portion of the API token
     private var baseToken: String? {
         guard let tok = token?.split(separator: "-").first else { return nil }
         return String(tok)
     }
 
+    /// Datacenter portion of the API token
     private var datacenter: String? {
         guard let dc = token?.split(separator: "-").last else { return nil }
         return String(dc)
@@ -143,6 +145,14 @@ struct AnzeeAPI {
 
     // ----------------------------------------------------------------
     // MARK: - URL Methods
+
+    /// Build URLRequest from values of our APIRequest.
+    ///
+    /// Constructs with full URL, HTTP verb, auth headers, etc.
+    ///
+    /// - Parameters:
+    ///     - request: `APIRequest` request wrapping struct
+    /// - Returns: `URLRequest?` properly configured. (nil if there was a problem)
     func buildURLRequest(for request: APIRequest) -> URLRequest? {
         guard let url = request.url(datacenter: datacenter) else { return nil }
 
