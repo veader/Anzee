@@ -23,26 +23,14 @@ struct CampaignsRequest: APIRequest {
         self.callback = callback
     }
 
-
-    func requestComplete(data: Data?, error apiError: APIError?) {
-        guard apiError == nil else {
-            callback?(nil, apiError)
-            return
-        }
-
-        guard let json = data else {
-            callback?(nil, .jsonMissingData)
-            return
-        }
-
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-
+    func requestComplete(_ result: Result<Data, APIError>) {
         do {
-            let response = try decoder.decode(CampaignsResponse.self, from: json)
+            let response = try result.decoded() as CampaignsResponse
             callback?(response.campaigns, nil)
+        } catch let apiError as APIError {
+            callback?(nil, apiError)
         } catch {
-            if let responseError = try? decoder.decode(APIErrorResponse.self, from: json) {
+            if let responseError = try? result.decoded() as APIErrorResponse {
                 callback?(nil, .apiError(response: responseError))
             } else {
                 callback?(nil, .jsonParsingError(err: "Unknown"))

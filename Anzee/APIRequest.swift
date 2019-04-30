@@ -35,8 +35,7 @@ protocol APIRequest {
     func url(datacenter: String?) -> URL?
 
     /// Callback used by request runner to indicate data (or error) has been returned.
-    func requestComplete(data: Data?, error: APIError?)
-    // TODO: use result type in Swift 5
+    func requestComplete(_: Result<Data, APIError>)
 }
 
 

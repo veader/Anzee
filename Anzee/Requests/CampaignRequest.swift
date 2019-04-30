@@ -27,30 +27,18 @@ struct CampaignRequest: APIRequest {
     }
 
 
-    func requestComplete(data: Data?, error apiError: APIError?) {
-        guard apiError == nil else {
-            callback?(nil, apiError)
-            return
-        }
-
-        guard let json = data else {
-            callback?(nil, .jsonMissingData)
-            return
-        }
-
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-
+    func requestComplete(_ result: Result<Data, APIError>) {
         do {
-            let response = try decoder.decode(Campaign.self, from: json)
+            let response = try result.decoded() as Campaign
             callback?(response, nil)
+        } catch let apiError as APIError {
+            callback?(nil, apiError)
         } catch {
-            if let responseError = try? decoder.decode(APIErrorResponse.self, from: json) {
+            if let responseError = try? result.decoded() as APIErrorResponse {
                 callback?(nil, .apiError(response: responseError))
             } else {
                 callback?(nil, .jsonParsingError(err: "Unknown"))
             }
         }
     }
-
 }
