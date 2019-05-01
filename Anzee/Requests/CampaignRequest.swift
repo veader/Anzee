@@ -15,7 +15,7 @@ struct CampaignRequest: APIRequest {
 
     var apiPath: String { return "campaigns/\(campaignID)" }
 
-    public typealias CampaignRequestCallback = ((_ campaign: Campaign?, _ error: APIError?) -> Void)
+    public typealias CampaignRequestCallback = (Result<Campaign, APIError>) -> Void
 
     /// Callback once API request is complete.
     public var callback: CampaignRequestCallback?
@@ -26,18 +26,17 @@ struct CampaignRequest: APIRequest {
         self.callback = callback
     }
 
-
     func requestComplete(_ result: Result<Data, APIError>) {
         do {
             let response = try result.decoded() as Campaign
-            callback?(response, nil)
+            callback?(.success(response))
         } catch let apiError as APIError {
-            callback?(nil, apiError)
+            callback?(.failure(apiError))
         } catch {
             if let responseError = try? result.decoded() as APIErrorResponse {
-                callback?(nil, .apiError(response: responseError))
+                callback?(.failure(.apiError(response: responseError)))
             } else {
-                callback?(nil, .jsonParsingError(err: "Unknown"))
+                callback?(.failure(.jsonParsingError(err: "Unknown")))
             }
         }
     }
