@@ -25,6 +25,7 @@ enum HTTPVerb: String {
 }
 
 public typealias JSONHash = [String:Any]
+typealias CompletionHandler = (Result<Data, APIError>) -> Void
 
 struct AnzeeAPI {
 
@@ -58,20 +59,20 @@ struct AnzeeAPI {
     @discardableResult
     public func process(request: APIRequest) -> URLSessionDataTask? {
         guard let urlRequest = buildURLRequest(for: request) else {
-            request.requestComplete(data: nil, error: .apiInvalidURL)
+            request.requestComplete(.failure(.apiInvalidURL))
             return nil
         }
 
         switch request.httpVerb() {
         case .get:
-            return getJSON(request: urlRequest) { data, error in
-                request.requestComplete(data: data, error: error)
+            return getJSON(request: urlRequest) { result in
+                request.requestComplete(result)
             }
         case .post:
             // TODO: set these from request
             let params = [String: String]()
-            return postJSON(request: urlRequest, params: params) { data, error in
-                request.requestComplete(data: data, error: error)
+            return postJSON(request: urlRequest, params: params) { result in
+                request.requestComplete(result)
             }
         }
     }
@@ -86,19 +87,19 @@ struct AnzeeAPI {
     ///     - request: `URLRequest` describing request
     ///     - completionBlock: block to call once the task is complete
     /// - Returns: `URLSessionDataTask` reference to task doing work
-    fileprivate func getJSON(request: URLRequest, completionBlock: @escaping (Data?, APIError?) -> Void) -> URLSessionDataTask {
+    fileprivate func getJSON(request: URLRequest, completionBlock: @escaping CompletionHandler) -> URLSessionDataTask {
         let urlSession = session()
         let task = urlSession.dataTask(with: request) { (data, response, responseError) -> Void in
             if let err = responseError as NSError? {
                 if err.domain == NSURLErrorDomain && err.code == -1001 {
-                    completionBlock(nil, .requestTimeout)
+                    completionBlock(.failure(.requestTimeout))
                 } else {
-                    completionBlock(nil, .requestError(err: err))
+                    completionBlock(.failure(.requestError(err: err)))
                 }
             } else if let jsonData = data {
-                completionBlock(jsonData, nil)
+                completionBlock(.success(jsonData))
             } else {
-                completionBlock(nil, .jsonMissingData)
+                completionBlock(.failure(.jsonMissingData))
             }
         }
 
@@ -113,7 +114,7 @@ struct AnzeeAPI {
     ///     - params: `[String: String]` dictionary of parameters to encode as JSON in body of requst
     ///     - completionBlock: block to call once the task is complete
     /// - Returns: `URLSessionDataTask` reference to task doing work
-    fileprivate func postJSON(request: URLRequest, params: [String: String], completionBlock: @escaping (Data?, APIError?) -> Void) -> URLSessionDataTask? {
+    fileprivate func postJSON(request: URLRequest, params: [String: String], completionBlock: @escaping CompletionHandler) -> URLSessionDataTask? {
         var mutableRequest = request
 
         // add any POST body params
@@ -127,14 +128,14 @@ struct AnzeeAPI {
         let task = urlSession.dataTask(with: mutableRequest) { (data, response, responseError) in
             if let err = responseError as NSError? {
                 if err.domain == NSURLErrorDomain && err.code == -1001 {
-                    completionBlock(nil, .requestTimeout)
+                    completionBlock(.failure(.requestTimeout))
                 } else {
-                    completionBlock(nil, .requestError(err: err))
+                    completionBlock(.failure(.requestError(err: err)))
                 }
             } else if let jsonData = data {
-                completionBlock(jsonData, nil)
+                completionBlock(.success(jsonData))
             } else {
-                completionBlock(nil, .jsonMissingData)
+                completionBlock(.failure(.jsonMissingData))
             }
         }
 

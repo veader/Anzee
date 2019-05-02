@@ -21,40 +21,49 @@ class AnzeeTests: XCTestCase {
 //    }
 
     func testCampaignsRequest() {
-        var result: [Campaign]?
+        var campaigns: [Campaign]?
 
         let group = DispatchGroup()
         group.enter()
 
-        var request = CampaignsRequest { campaigns, error in
+        var request = CampaignsRequest { result in
             defer { group.leave() }
-            XCTAssertNil(error)
-            result = campaigns
+            
+            switch result {
+            case .success(let downloadedCampaigns):
+                campaigns = downloadedCampaigns
+            case .failure:
+                XCTFail()
+            }
         }
 
         api?.process(request: request)
         group.wait()
 
-        XCTAssertEqual(10, result?.count)
-        // print(result?.first)
+        XCTAssertEqual(10, campaigns?.count)
     }
 
     func testCampaignRequest() {
-        var result: Campaign?
+        var campaign: Campaign?
 
         let group = DispatchGroup()
         group.enter()
 
-        var request = CampaignRequest(campaignID: "CAMPAIGN ID") { campaign, error in
+        var request = CampaignRequest(campaignID: "CAMPAIGN ID") { result in
             defer { group.leave() }
-            XCTAssertNil(error)
-            result = campaign
+            
+            switch result {
+            case .success(let downloadedCampaign):
+                campaign = downloadedCampaign
+            case .failure:
+                XCTFail()
+            }
         }
 
         api?.process(request: request)
         group.wait()
 
-        XCTAssertNotNil(result)
+        XCTAssertNotNil(campaign)
         // print(result)
     }
 
