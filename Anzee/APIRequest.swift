@@ -74,7 +74,7 @@ extension APIRequest {
         return updatedComponents.url
     }
 
-    func postBody() -> PostBody<CodableDefault, PostBodyParameters>? {
+    func postBody() -> PostBody<CodableDefault, ParametersDefault>? {
         return nil
     }
 

@@ -17,7 +17,7 @@ protocol PostBodyParamable {
     var params: [String: String] { get }
 }
 
-struct PostBodyParameters: PostBodyParamable {
+struct ParametersDefault: PostBodyParamable {
     var params: [String : String] = [:]
 }
 
