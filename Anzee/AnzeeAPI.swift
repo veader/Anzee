@@ -57,7 +57,7 @@ struct AnzeeAPI {
     ///
     /// - Returns: `NSURLSessionDataTask?` optional data task
     @discardableResult
-    public func process(request: APIRequest) -> URLSessionDataTask? {
+    public func process<T: APIRequest>(request: T) -> URLSessionDataTask? {
         guard let urlRequest = buildURLRequest(for: request) else {
             request.requestComplete(.failure(.apiInvalidURL))
             return nil
@@ -69,9 +69,7 @@ struct AnzeeAPI {
                 request.requestComplete(result)
             }
         case .post:
-            // TODO: set these from request
-            let params = [String: String]()
-            return postJSON(request: urlRequest, params: params) { result in
+            return postJSON(request: urlRequest, postBody: request.postBody()) { result in
                 request.requestComplete(result)
             }
         }
@@ -80,7 +78,7 @@ struct AnzeeAPI {
 
     // ----------------------------------------------------------------
     // MARK: - Wrappers
-
+    
     /// Execute a GET request for a JSON response. Uses a `URLSessionDataTask` to do the work.
     ///
     /// - Parameters:
@@ -91,7 +89,7 @@ struct AnzeeAPI {
         let urlSession = session()
         let task = urlSession.dataTask(with: request) { (data, response, responseError) -> Void in
             if let err = responseError as NSError? {
-                if err.domain == NSURLErrorDomain && err.code == -1001 {
+                if err.domain == NSURLErrorDomain && err.code == NSURLErrorTimedOut {
                     completionBlock(.failure(.requestTimeout))
                 } else {
                     completionBlock(.failure(.requestError(err: err)))
@@ -111,23 +109,37 @@ struct AnzeeAPI {
     ///
     /// - Parameters:
     ///     - request: `URLRequest` describing request
-    ///     - params: `[String: String]` dictionary of parameters to encode as JSON in body of requst
+    ///     - postBody: `PostBody` An enum with associated values to encode as JSON in body of request
     ///     - completionBlock: block to call once the task is complete
     /// - Returns: `URLSessionDataTask` reference to task doing work
-    fileprivate func postJSON(request: URLRequest, params: [String: String], completionBlock: @escaping CompletionHandler) -> URLSessionDataTask? {
+    fileprivate func postJSON<T: Codable, U: PostBodyParamable>(request: URLRequest, postBody: PostBody<T, U>?, completionBlock: @escaping CompletionHandler) -> URLSessionDataTask? {
         var mutableRequest = request
-
-        // add any POST body params
-        do {
-            mutableRequest.httpBody = try JSONSerialization.data(withJSONObject: params, options: JSONSerialization.WritingOptions.prettyPrinted)
-        } catch {
-            return nil
+        
+        // Add any POST body params
+        if let postBody = postBody {
+            switch postBody {
+            case .object(let object):
+                let jsonEncoder = JSONEncoder()
+                jsonEncoder.keyEncodingStrategy = .convertToSnakeCase
+                do {
+                    let jsonData = try jsonEncoder.encode(object)
+                    mutableRequest.httpBody = jsonData
+                } catch {
+                    return nil
+                }
+            case .params(let params):
+                do {
+                    mutableRequest.httpBody = try JSONSerialization.data(withJSONObject: params, options: JSONSerialization.WritingOptions.prettyPrinted)
+                } catch {
+                    return nil
+                }
+            }
         }
 
         let urlSession = session()
         let task = urlSession.dataTask(with: mutableRequest) { (data, response, responseError) in
             if let err = responseError as NSError? {
-                if err.domain == NSURLErrorDomain && err.code == -1001 {
+                if err.domain == NSURLErrorDomain && err.code == NSURLErrorTimedOut {
                     completionBlock(.failure(.requestTimeout))
                 } else {
                     completionBlock(.failure(.requestError(err: err)))
@@ -154,7 +166,7 @@ struct AnzeeAPI {
     /// - Parameters:
     ///     - request: `APIRequest` request wrapping struct
     /// - Returns: `URLRequest?` properly configured. (nil if there was a problem)
-    func buildURLRequest(for request: APIRequest) -> URLRequest? {
+    func buildURLRequest<T: APIRequest>(for request: T) -> URLRequest? {
         guard let url = request.url(datacenter: datacenter) else { return nil }
 
         var urlRequest = URLRequest(url: url)
@@ -175,7 +187,7 @@ struct AnzeeAPI {
     // ----------------------------------------------------------------
     // MARK: - URL Session
 
-    /// Create a default session to use with appropriate timout
+    /// Create a default session to use with appropriate timeout
     ///
     /// - Returns: `URLSession` with proper configuration
     fileprivate func session() -> URLSession {
