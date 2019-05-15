@@ -20,6 +20,7 @@
 		76CE62B522546706007376BB /* AnzeeAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76CE62B422546706007376BB /* AnzeeAPI.swift */; };
 		76CE62B822546827007376BB /* CampaignsRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76CE62B722546827007376BB /* CampaignsRequest.swift */; };
 		B95896C42278D93500F7509B /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95896C32278D93500F7509B /* Result.swift */; };
+		B95896D2228482B700F7509B /* PostBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95896D1228482B600F7509B /* PostBody.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +50,7 @@
 		76CE62B422546706007376BB /* AnzeeAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnzeeAPI.swift; sourceTree = "<group>"; };
 		76CE62B722546827007376BB /* CampaignsRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CampaignsRequest.swift; sourceTree = "<group>"; };
 		B95896C32278D93500F7509B /* Result.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Result.swift; sourceTree = "<group>"; };
+		B95896D1228482B600F7509B /* PostBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostBody.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -117,6 +119,7 @@
 				76BB8E32226FFE2400BC8B93 /* APIErrorResponse.swift */,
 				76BB8E2D226F5AC600BC8B93 /* AnzeeConstants.swift */,
 				76CE6299225465EF007376BB /* Anzee.h */,
+				B95896D1228482B600F7509B /* PostBody.swift */,
 				76CE629A225465EF007376BB /* Info.plist */,
 			);
 			path = Anzee;
@@ -259,6 +262,7 @@
 				76CE62B822546827007376BB /* CampaignsRequest.swift in Sources */,
 				76BB8E2C226F516900BC8B93 /* URLRequest.swift in Sources */,
 				76BB8E33226FFE2400BC8B93 /* APIErrorResponse.swift in Sources */,
+				B95896D2228482B700F7509B /* PostBody.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

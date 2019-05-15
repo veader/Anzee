@@ -20,7 +20,7 @@ extension URLRequest {
         let authString = "\(username):\(password ?? "")"
         if let authData = authString.data(using: String.Encoding.utf8) {
             let base64AuthString = authData.base64EncodedString()
-            self.setValue("Basic \(base64AuthString)", forHTTPHeaderField: "Authorization")
+            setValue("Basic \(base64AuthString)", forHTTPHeaderField: "Authorization")
         }
     }
 }

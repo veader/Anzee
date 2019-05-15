@@ -11,15 +11,18 @@ import Foundation
 /// Protocol that defines the properties that are needed in order to
 ///     make a Mailchimp API request
 protocol APIRequest {
+    associatedtype T: Codable
+    associatedtype U: PostBodyParamable
 
     /// An array of query params that will be used to make a GET request.
     var params: [URLQueryItem]? { get }
 
-    // TODO: POST params
-    // TODO: headers to inject
-
     /// Path within API for the request.
     var apiPath: String { get }
+
+    /// A dictionary containing all the HTTP header fields of the
+    /// receiver.
+    func headers() -> [String : String]?
 
     /// Does this request require the default basic auth header?
     /// - Note: Default implementation returns true
@@ -36,11 +39,18 @@ protocol APIRequest {
 
     /// Callback used by request runner to indicate data (or error) has been returned.
     func requestComplete(_: Result<Data, APIError>)
+
+    /// This data is serialized and sent as the message body of a POST request.
+    func postBody() -> PostBody<T, U>?
 }
 
 
 // MARK: - Default Method Implementations
 extension APIRequest {
+    func headers() -> [String : String]? {
+        return nil
+    }
+
     func requiresAuth() -> Bool {
         return true
     }
@@ -62,6 +72,10 @@ extension APIRequest {
         updatedComponents.queryItems = queryItems
 
         return updatedComponents.url
+    }
+
+    func postBody() -> PostBody<CodableDefault, ParametersDefault>? {
+        return nil
     }
 
     /// Return all query params required to perform this API requst.
