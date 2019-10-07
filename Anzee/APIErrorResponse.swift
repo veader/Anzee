@@ -10,7 +10,7 @@ import Foundation
 
 /// Basic struct to parse any possible API error responses
 public struct APIErrorResponse: Codable {
-    let status: Int
-    let type: String
-    let detail: String
+    public let status: Int
+    public let type: String
+    public let detail: String
 }
