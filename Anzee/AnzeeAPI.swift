@@ -8,7 +8,7 @@
 
 import Foundation
 
-enum APIError: Error {
+public enum APIError: Error {
     case jsonParsingError(err: String)
     case requestError(err: Error)
     case requestTimeout
@@ -27,7 +27,11 @@ enum HTTPVerb: String {
 public typealias JSONHash = [String:Any]
 typealias CompletionHandler = (Result<Data, APIError>) -> Void
 
-struct AnzeeAPI {
+protocol API {
+    func process<T: APIRequest>(request: T) -> URLSessionDataTask?
+}
+
+struct AnzeeAPI: API {
 
     /// The API token to use to authenticate to Mailchimp API
     /// Documentation: https://developer.mailchimp.com/documentation/mailchimp/guides/get-started-with-mailchimp-api-3/#authentication
@@ -78,7 +82,7 @@ struct AnzeeAPI {
 
     // ----------------------------------------------------------------
     // MARK: - Wrappers
-    
+
     /// Execute a GET request for a JSON response. Uses a `URLSessionDataTask` to do the work.
     ///
     /// - Parameters:
@@ -114,13 +118,12 @@ struct AnzeeAPI {
     /// - Returns: `URLSessionDataTask` reference to task doing work
     fileprivate func postJSON<T: Codable, U: PostBodyParamable>(request: URLRequest, postBody: PostBody<T, U>?, completionBlock: @escaping CompletionHandler) -> URLSessionDataTask? {
         var mutableRequest = request
-        
+
         // Add any POST body params
         if let postBody = postBody {
             switch postBody {
             case .object(let object):
                 let jsonEncoder = JSONEncoder()
-                jsonEncoder.keyEncodingStrategy = .convertToSnakeCase
                 do {
                     let jsonData = try jsonEncoder.encode(object)
                     mutableRequest.httpBody = jsonData
@@ -177,7 +180,7 @@ struct AnzeeAPI {
         }
 
         if request.requiresAuth() {
-            urlRequest.addBasicAuthHeader(username: "apitoken", password: baseToken)
+            urlRequest.addBasicAuthHeader(username: "apikey", password: baseToken)
         }
 
         return urlRequest
@@ -197,5 +200,5 @@ struct AnzeeAPI {
 
         return URLSession(configuration: sessionConfig)
     }
-    
+
 }

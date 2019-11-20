@@ -105,5 +105,5 @@ extension APIRequest {
         guard let datacenter = datacenter else { return nil }
         return URL(string: "https://\(datacenter).\(AnzeeConstants.APIHost)/")
     }
-    
+
 }
